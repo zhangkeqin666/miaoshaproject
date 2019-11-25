@@ -16,6 +16,13 @@
     <h3 class="form-title">
         商品详情
     </h3>
+    <div id="promoStartDateContainer" class="form-group">
+        <label style="color:blue" id="promoStatus" class="control-label"></label>
+        <div>
+            <label style="color:red" class="control-label" id="promoStartDate">
+            </label>
+        </div>
+    </div>
     <div class="form-group">
         <div>
             <label class="control-label" id="title"></label>
@@ -40,7 +47,14 @@
             </label>
         </div>
     </div>
-    <div class="form-group">
+    <div id="promoPriceContainer" class="form-group">
+        <label style="color:red" class="control-label">秒杀价格</label>
+        <div>
+            <label style="color:red" class="control-label" id="promoPrice">
+            </label>
+        </div>
+    </div>
+    <div id="normalPriceContainer" class="form-group">
         <label class="control-label">价格</label>
         <div>
             <label class="control-label" id="price">
@@ -79,6 +93,25 @@
         $("#stock").text(g_item.stock);
         $("#price").text(g_item.price);
         $("#sales").text(g_item.sales);
+        if (g_item.promoStatus == 1) {
+            //秒杀活动还未开始
+            var startTime = g_item.startDate.replace(new RegExp("-", "gm"), "/");
+            startTime = (new Date(startTime)).getTime();
+            var nowTime = Date.parse(new Date());
+            var delta = (startTime - nowTime) / 1000;
+            if (delta <= 0) {
+                g_item.promoStatus = 2;
+                reloadDom();
+            }
+            $("#promoStartDate").text("秒杀活动将于："+g_item.startDate+" 开始 倒计时："+delta+"秒");
+            $("#promoPrice").text(g_item.promoPrice);
+            $("#createorder").attr("disabled", true);
+        }else if (g_item.promoStatus == 2) {
+            $("#promoStartDate").text("秒杀正在进行中...");
+            $("#promoPrice").text(g_item.promoPrice);
+            $("#createorder").attr("disabled", false);
+            $("#normalPriceContainer").hide();
+        }
     }
 
     jQuery(document).ready(function () {
@@ -90,6 +123,7 @@
                 data:{
                     "itemId":g_item.id,
                     "amount":1,
+                        "promoId":g_item.promoId,
                 },
                 xhrFields:{withCredentials: true},
                 success:function (data) {
@@ -119,6 +153,7 @@
                     if (data.status == "success") {
                         g_item = data.data;
                         reloadDom();
+                        setInterval(reloadDom, 1000);
                     } else {
                         alert("获取信息失败，原因为："+data.data.errMsg);
                         if (data.data.errCode == 20003) {

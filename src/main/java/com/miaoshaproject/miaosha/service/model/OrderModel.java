@@ -20,6 +20,17 @@ public class OrderModel {
     //购买金额
     private BigDecimal orderPrice;
 
+    public Integer getPromoId() {
+        return promoId;
+    }
+
+    public void setPromoId(Integer promoId) {
+        this.promoId = promoId;
+    }
+
+    //若非空 则表示为以秒杀方式下单
+    private Integer promoId;
+
     public String getId() {
         return id;
     }

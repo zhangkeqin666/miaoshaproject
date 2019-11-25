@@ -5,6 +5,8 @@ import com.miaoshaproject.miaosha.error.BusinessException;
 import com.miaoshaproject.miaosha.response.CommonReturnType;
 import com.miaoshaproject.miaosha.service.Imp.ItemServiceImpl;
 import com.miaoshaproject.miaosha.service.model.ItemModel;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -65,12 +67,21 @@ public class ItemController extends BaseController {
         return CommonReturnType.create(itemViewModels);
     }
 
-    private ItemViewModel convertToItemViewModel(ItemModel itemModelReturn) {
-        if (itemModelReturn == null) {
+    private ItemViewModel convertToItemViewModel(ItemModel itemModel) {
+        if (itemModel == null) {
             return null;
         }
         ItemViewModel itemViewModel = new ItemViewModel();
-        BeanUtils.copyProperties(itemModelReturn,itemViewModel);
+        BeanUtils.copyProperties(itemModel,itemViewModel);
+        if (itemModel.getPromoModel() != null) {
+            //有秒杀活动
+            itemViewModel.setPromoStatus(itemModel.getPromoModel().getStatus());
+            itemViewModel.setPromoId(itemModel.getPromoModel().getId());
+            itemViewModel.setStartDate(itemModel.getPromoModel().getStartDate().toString(DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")));
+            itemViewModel.setPromoPrice(itemModel.getPromoModel().getPromoItemPrice());
+        } else {
+            itemViewModel.setPromoStatus(0);
+        }
         return itemViewModel;
     }
 
